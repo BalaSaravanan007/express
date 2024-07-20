@@ -1,4 +1,5 @@
 const Tour = require('./../models/tourModels');
+const APIfeatures = require('./../Utils/apiFeatures');
 // const fs = require('fs');
 
 // const tours = JSON.parse(
@@ -36,73 +37,14 @@ exports.topCheapTours = (req, res, next) => {
 
 exports.GetAllTour = async (req, res) => {
   try {
-    //BUILD QUERY
-
-    //FILTER
-
-    //method 1 using mongoDB filters
-
-    // const tours = await Tour.find({
-    //   duration: 5,
-    //   difficulty: 'easy',
-    // });
-
-    //method 2 using advanced mongoose filters
-
-    // const tours = await Tour.find()
-    //   .where('duration')
-    //   .equals(5)
-    //   .where('difficulty')
-    //   .equals('easy');
-
-    const queryObj = { ...req.query }; // make shallow copy obj using `...` so making changes here not disturb the req.query
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((el) => delete queryObj[el]); // iterates over each el in exFields and deletes if exFields present in queryObj
-
-    //ADVANCED FILTERING
-
-    //{ duration : { $gte: 5} }  What we want
-    //{ duration: { gte: '5' } }  What we got
-    // so using regex to replace gte with $gte
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(lte|gte|lt|gt)\b/g, (match) => `$${match}`);
-
-    let query = Tour.find(JSON.parse(queryStr));
-
-    //SORTING
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('CreatedAt');
-    }
-
-    //LIMITING
-
-    if (req.query.fields) {
-      const fields = req.query.fields.split(',').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
-
-    //PAGINATION
-
-    let page = req.query.page * 1 || 1;
-    let limit = req.query.limit * 1 || 100;
-    let skip = (page - 1) * limit;
-
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTour = await Tour.countDocuments();
-      // throwing a error inside the try block immediately call the catch block
-      if (skip >= numTour) throw new Error('This Page Does Not Exist');
-    }
-
     //AWAIT QUERY
-    const tours = await query;
+    const features = new APIfeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
+
     //SEND RESPONSE
     res.status(200).json({
       status: 'success',
