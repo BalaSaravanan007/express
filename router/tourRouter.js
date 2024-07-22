@@ -6,6 +6,10 @@ const Router = express.Router();
 // Router.param('id', tourController.checkID);
 
 // when user route to this url we first run the middleware function followed by the GetAllTour function
+
+Router.route('/tour-stats').get(tourController.TourStats);
+Router.route('/monthly-plan/:year').get(tourController.GetMonthlyPlan);
+
 Router.route('/top-5-cheap').get(
   tourController.topCheapTours,
   tourController.GetAllTour
