@@ -156,21 +156,25 @@ exports.DeleteTour = async (req, res) => {
 
 exports.TourStats = async (req, res) => {
   try {
+    // performing aggregation pipeline methods
     const stats = await Tour.aggregate([
+      // stage 1
       {
-        $match: { ratingAverage: { $gte: 4.5 } },
+        $match: { ratingsAverage: { $gte: 4.5 } },
       },
+      // stage 2
       {
         $group: {
-          _id: '$ratingAverage',
+          _id: '$ratingsAverage',
           numTours: { $sum: 1 },
-          numRating: { $sum: '$ratingQuantity' },
-          avgRating: { $avg: '$ratingAverage' },
+          numRating: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
           avgPrice: { $avg: '$price' },
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
         },
       },
+      // stage 3
       {
         $sort: { avgPrice: 1 },
       },
@@ -194,24 +198,69 @@ exports.GetMonthlyPlan = async (req, res) => {
   try {
     const year = req.params.year * 1;
 
+    // Define the start and end dates for the given year
+    const startDate = new Date(`${year}-01-01T00:00:00Z`);
+    const endDate = new Date(`${year + 1}-01-01T00:00:00Z`);
+
     const plan = await Tour.aggregate([
+      {
+        $addFields: {
+          // Convert startDates strings to ISODate
+          startDates: {
+            $map: {
+              input: '$startDates',
+              as: 'dateStr',
+              in: {
+                $dateFromString: {
+                  dateString: {
+                    $concat: [
+                      { $arrayElemAt: [{ $split: ['$$dateStr', ','] }, 0] }, // Date part
+                      'T', // Separator
+                      { $arrayElemAt: [{ $split: ['$$dateStr', ','] }, 1] }, // Time part
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       {
         $unwind: '$startDates',
       },
       {
         $match: {
           startDates: {
-            $gte: new Date(`${year}-01-01`),
-            $lte: new Date(`${year}-12-31`),
+            $gte: startDate,
+            $lt: endDate,
           },
         },
       },
+
       {
         $group: {
           _id: { $month: '$startDates' },
           numTourStarts: { $sum: 1 },
           tours: { $push: '$name' },
         },
+      },
+      {
+        $addFields: {
+          month: '$_id',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $sort: {
+          numTourStarts: -1,
+        },
+      },
+      {
+        $limit: 12,
       },
     ]);
 
