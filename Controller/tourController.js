@@ -165,7 +165,7 @@ exports.TourStats = async (req, res) => {
       // stage 2
       {
         $group: {
-          _id: '$ratingsAverage',
+          _id: { $toUpper: '$difficulty' },
           numTours: { $sum: 1 },
           numRating: { $sum: '$ratingsQuantity' },
           avgRating: { $avg: '$ratingsAverage' },
@@ -175,6 +175,7 @@ exports.TourStats = async (req, res) => {
         },
       },
       // stage 3
+
       {
         $sort: { avgPrice: 1 },
       },
@@ -203,6 +204,8 @@ exports.GetMonthlyPlan = async (req, res) => {
     const endDate = new Date(`${year + 1}-01-01T00:00:00Z`);
 
     const plan = await Tour.aggregate([
+      // performing aggregation pipeline
+
       {
         $addFields: {
           // Convert startDates strings to ISODate
