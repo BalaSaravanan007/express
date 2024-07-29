@@ -86,10 +86,11 @@ const tourSchema = new mongoose.Schema(
 // virtual properties
 
 /*These are properties that 
-do not affect the original database
-like pipeline aggregation
-but we can do alterations
-to the specified fields */
+do not affect the original 
+database like pipeline 
+aggregationbut we can do 
+alterationsto the specified 
+fields */
 
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
