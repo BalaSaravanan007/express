@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./router/tourRouter');
 const UserRouter = require('./router/userRouter');
+const globlaErrorHandler = require('./Controller/errorController');
 const AppError = require('./Utils/appError');
 
 const app = express();
@@ -48,15 +49,6 @@ app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} in this Server!`, 404));
 });
 
-app.use((err, req, res, next) => {
-  console.log(err.stack);
-
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-});
+app.use(globlaErrorHandler);
 
 module.exports = app;

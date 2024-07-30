@@ -135,11 +135,11 @@ tourSchema.pre(/^find/, function (next) {
 });
 
 //RUNS AFTER find() method
-tourSchema.post(/^find/, function (docs, next) {
-  console.log(`Query takes ${Date.now() - this.start} milliseconds!`);
-  // console.log(docs);
-  next();
-});
+// tourSchema.post(/^find/, function (docs, next) {
+//   console.log(`Query takes ${Date.now() - this.start} milliseconds!`);
+//   // console.log(docs);
+//   next();
+// });
 
 //RUNS BEFORE aggregate()
 

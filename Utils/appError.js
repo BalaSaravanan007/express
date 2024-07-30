@@ -1,3 +1,5 @@
+// creating a class which inherits the properties of the class Error
+
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
