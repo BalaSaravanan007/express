@@ -11,11 +11,13 @@ const sendErrorDev = (err, res) => {
 
 const sendErrorProd = (err, res) => {
   if (err.isOperational) {
+    // 1) Operational err: we can send details about the error to the user
     res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   } else {
+    // 2) Programming err: we don't need
     console.error('ERROR: 💥', err);
 
     res.status(500).json({
