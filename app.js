@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', UserRouter);
 
-// handling unhandled routes
+// HANDLING UNHANDLED ROUTES
 
 /* its a middleware func which runs in the order of they defined
 so if it find any routes that doesn't match the routehandler above
